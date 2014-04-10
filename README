@@ -1,0 +1,105 @@
+Tifany Yung
+tyung1@jhu.edu
+Declarative HW 3
+April 11, 2014
+
+PROBLEM 1
+---------
+a) X=X, Y=X, A=X, B=X.
+b) Cannot unify -> no new terms or variable bindings.
+c) X=1, Y=Y, A=2, B=[1,4,Y].
+d) A=h(D), B=B, D=D, E=g(B).
+
+
+PROBLEM 2
+---------
+a) Please see problem2.ecl.
+b) Runtime is O(min(A,B)), linear in the minimum of A and B. The program will continue removing layers of s() until either A or B, assuming A and B are Peano integers. The smaller of A and B will reach z first, so the program takes that many steps to terminate.
+c) Assuming A and B are both Peano integers,
+   (+,+): Returns yes if ground integer A is greater than ground integer B, no otherwise.
+   (+,-): Returns Peano integers for B such that it is less than the ground integer A.
+   (-,+): Returns Peano integers for A such that it is greater than the ground integer B.
+   (-,-): Returns pairs of Peano integers A and B such that A>B. Note that B=z always since every Peano integer A!=z is greater than z, and there is an infinite number of such Peano integers.
+d) Although the two conditions together imply that A=B, a correct Prolog solver must check the cases when A>B or A<B and then reject and backtrack from those, since the Prolog solver cannot determine that A=B in each of the infinitely many cases of different A and B values. For example, even though if A=z, we know the only value that satifies the constraints is B=z, the solver does not know that and must check another, larger value of B to rule out all values of B larger than z.
+
+
+PROBLEM 3
+---------
+Please see problem3.ecl.
+The query duplicate([f(3),f(X),X,Y]) returns M=[f(3),3], X=3, Y=3.
+
+
+PROBLEM 4
+---------
+a) Please see problem4.ecl.
+   The queries swap([a],L) and swap([],L) both return the original list since there are not two elements in the list that can be swapped.
+b) The mystery/2 predicate performs three swaps on a list W and places the result in Z.
+   The query mystery([1,2,3,...,n],L) returns the list [1,2,3,...,n] with three swaps and places the result in L. These lists are not all different because it is possible and does happen that a certain sequence of three swaps yields the same result as a different sequence of swaps.
+
+
+PROBLEM 5
+---------
+a) Please see problem5.ecl.
+b) The program returns s(z).
+c) The program returns no if A, B, and C are not all Peano integers, except for when A takes the form of s(foo), where foo is not a Peano integer.
+d) Internally, the program is recursively multiplying by A for B times, starting at s(z). The program multiplies by recursively adding A to the current amount, so A additions are called. Since each addition takes A steps, the overall runtime for the program is O(B*A*A).
+e) To calculate the root of n, the query pow(X,X,n) can be used, where X is the square root of n. The program hangs after finding the square root since there are an infinite number of other Peano integers to check.
+   To calculate the base b logarithm of n, the query pow(b,X,n) can be used, where X is the logarithm base b of n.
+   Although the program finds the first and only solution, it does not know that and continues looking forever.
+
+
+PROBLEM 6
+---------
+The cut in cutmember is green since it finds a solution but makes the program more efficient by not looking for alternative solutions. Since the purpose of cutmember is to determine if there is some X which is a member of the given list, its job is done when it finds a single X. If we want to check if a ground integer appears in a long list, cutmember would stop at the first occurrence, thus saving time by not going through the entire list, especially if the ground integer was near the beginning.
+
+- The query cutmember(L,[[a,b],[],[c,d]]), member(X,L). outputs L=[a,b], X=a; then L=[a,b], X=b.
+- The query member(L,[[a,b],[],[c,d]]), cutmember(X,L). outputs L=[a,b], X=a; then L=[c,d], X=c.
+- The query member(L,[[],[a,b],[c,d]]), cutmember(X,L) outputs L=[a,b], X=a.
+
+The first and third queries do the same thing, but the second one does not.
+- The query member(L,[[a,b],[],[c,d]]), !, member(X,L). outputs L=[a,b], X=a; then L=[a,b], X=b.
+- The query member(L, [[a,b],[],[c,d]]), member(X,L), !. outputs L=[a,b], X=a.
+- The query member(L,[[],[a,b],[c,d]]), member(X,L), !. outputs L=[a,b], X=a.
+In the second query of the first set, the cut operator inside of cutmember forced X to remain what had been assigned to it. However, the solver was free to go back and change the assignment made by the member predicate, so L=[a,b] became L=[c,d]. Consequently, cutmember was called again, which set X=c. In the second query of the second set, however, the solver is prevented from reaching both calls to the member predicate, so the solver could not change any of the assignments and terminated with one solution.
+A cut operator within a subroutine only prevents the solver from backtracking into the subroutine and changing any assignments the subroutine makes. When the cut operator is placed outside the subroutine, however, it prevents the solver from reaching any of the assignments made by constraints before the cut.
+
+
+PROBLEM 7
+---------
+a) The above program also returns lists L where only some or none of the repeated elements have been removed. For example, if the list [a,a,b,b,c] were given as the first argument, some of the lists returned would have two a's or b's, or both.
+b) We would like Prolog to return some number that does not equal 3, which would make all of the elements in the list unique. However, Prolog returns X=X. Prolog cannot return what we would like it to.
+c) Insert a cut after the second line. Please see problem7.ecl for the location.
+d) On the query uniq([3,X],L), the modified program returns X=3, L=[3].
+   On the query uniq([3,X],[3,X]), the modifies program still returns X=X. This 
+e) 
+
+
+PROBLEM 8
+---------
+a) Please see problem8.ecl.
+b) The query that would count only subsequences of length 3 is findall(S,(inc_subseq([3,5,2,6,7,4,9,1,8,0],S),length(S,3)),List), length(List,N).
+c) It should be more efficient to process the "length=3" constraint before the "inc_subseq" constraint. Doing so allows the solver to throw out a solution if it becomes longer than 3. However, processing the length constraint after "inc_subseq" forces the solver to discover all increasing subsequences in full. Therefore, the solver spends time working out solutions for S that have length greater than 3, while processing length first lets the solver rule out a solution the moment its length exceeds 3.
+d) Please see problem8.ecl. The command that gives one of the longest increasing subsequences of a given list is minimize((inc_subseq(S,L),length(L,X), Cost is -X), Cost).
+
+
+PROBLEM 9
+---------
+a) The predicate p/2 multiplies together all of the elements in the list given in the first argument and places the result in the second argument.
+b) The predicate q/2 finds a list whose elements multiply to equal the second element N and places the resulting list in the first argument. Only lists whose elements are between 2 and N inclusive are found. When all of the lists are found, the program hangs because it is checking an infinite number of other possible lists.
+c) There are actually only two variables. B simply holds the result of the prior 1-n recursive multiplications so that it may be multiplied by the (n+1)th element. Thus, B is dependent on and varies with Xs and is not an independent numeric variable in its own right.
+d) The query q([7,R],20) looks for a single number R that will yield 20 when multiplied by 7. However, there is no integer that fulfills this constraint.
+   The query q([7|Rs],20) looks for all lists that begin with 7, ends with any list of variables, and which yields 20 when all of the elements in the list are multiplied together. However, since there are an infinite number of lists that begin with 7, the program keeps checking them forever. The main difference is that this query allows however many elements to be in the list in the first argument, so long as the list begins with element 7. The previous query, which did not use the | bar notation, would only take lists of length two, where the first element is 7.
+
+
+PROBLEM 10
+----------
+a) Please see problem10.ecl.
+
+
+PROBLEM 11
+----------
+a) Please see problem11.ecl.
+b) Please see problem11.ecl for the predicate inorder2. The original predicate inorder1 ran into an infinite recursion because the program would begin with the first constraint, which contains a recursion. Therefore, without a base case, the program recurses endlessly through the recursive call to inorder1 in the first constraint of inorder1 and never finds out how to build up from a leaf node. It is continuously working through and making an infinite number of internal nodes.
+   The new predicate inorder2 yields Tree = t(a, nil, t(b, nil, t(c, nil, t(d, nil, t(e, nil, nil))))).
+   There are 
+   Using inorder2 on the example in 11a still yields List=[a,b,c,d,e] because, while the program has not reached the leaf node base case, it falls through the first constraint, just as if it weren't there, like in inorder1. Once it reaches a leaf node, the inorder2 is caught by the first constraint, and the recursion unravels. In inorder1, the program goes through the first constraint, which is equivalent to inorder2's second constraint, until the program reaches a leaf node. Then, inorder1 falls through the first constraint and is caught by the second constraint, which is equivalent to inorder1's first constraint. Thus, both predicates go through the same constraints in the same order because they fall through and ignore constraints which don't apply during a particular recursion.
