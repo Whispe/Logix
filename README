@@ -82,6 +82,24 @@ a) Please see problem8.ecl.
 b) The query that would count only subsequences of length 3 is findall(S,(inc_subseq([3,5,2,6,7,4,9,1,8,0],S),length(S,3)),List), length(List,N).
 c) It should be more efficient to process the "length=3" constraint before the "inc_subseq" constraint. Doing so allows the solver to throw out a solution if it becomes longer than 3. However, processing the length constraint after "inc_subseq" forces the solver to discover all increasing subsequences in full. Therefore, the solver spends time working out solutions for S that have length greater than 3, while processing length first lets the solver rule out a solution the moment its length exceeds 3.
 d) Please see problem8.ecl. The command that gives one of the longest increasing subsequences of a given list is minimize((inc_subseq(S,L),length(L,X), Cost is -X), Cost).
+e) The query Vars=[A,B,C,D,E], Vars::1..4, inc_subseq(Vars,[E,C,A]), labeling(Vars). looks for an assignment for A-E such that E > C > A.
+   This query yields four results:
+   Vars = [3, 1, 2, 3, 1]
+   Vars = [4, 1, 2, 4, 1]
+   Vars = [4, 1, 3, 4, 1]
+   Vars = [4, 2, 3, 4, 2]. These results do conform to the constraints given. If a variable has not been instantiated, the solver stores the constraint until it has been initialized, checks whether all constraints have been satisfied, and backtracks if they are not or if there may be more solutions.
+
+   The query Vars = [A,B,C,D,E], Vars::1..4, inc_subseq(Vars,[E,C,A]). yields the result
+      Vars = [A{[3, 4]}, B{[1, 2]}, C{[2, 3]}, A, B]
+      A = A{[3, 4]}
+      B = B{[1, 2]}
+      C = C{[2, 3]}
+      D = A{[3, 4]}
+      E = B{[1, 2]}
+      Delayed goals:
+         A{[3, 4]} - C{[2, 3]} #> 0
+         C{[2, 3]} - B{[1, 2]} #> 0
+    The solver outputted the ranges of all values for A-E that would satisfy the constraints. The position of the value in each variable's list of values corresponds to which combinations of values can together satisfy the constraints. For example, if A=3, then B=1, etc. The solver finds these values while backtracking and simply saves these to lists to be outputted at the end.
 
 
 PROBLEM 9
@@ -96,6 +114,13 @@ d) The query q([7,R],20) looks for a single number R that will yield 20 when mul
 PROBLEM 10
 ----------
 a) Please see problem10.ecl.
+b)     a             a
+     /   \         /   \
+    a     a       a     a
+   / \   / \     / \   / \
+  a   a a   b   a   a a   c
+
+   The query isotree(t(a,t(a,t(a,nil,nil),t(a,nil,nil)),t(a,t(a,nil,nil),t(b,nil,nil))), t(a,t(a,t(a,nil,nil),t(a,nil,nil)),t(a,t(a,nil,nil),t(c,nil,nil))). would force the solver to check every subtree and leaf node until it reached the deepest node on the bottom right.
 
 
 PROBLEM 11
