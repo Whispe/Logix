@@ -20,7 +20,8 @@ c) Assuming A and B are both Peano integers,
    (+,-): Returns Peano integers for B such that it is less than the ground integer A.
    (-,+): Returns Peano integers for A such that it is greater than the ground integer B.
    (-,-): Returns pairs of Peano integers A and B such that A>B. Note that B=z always since every Peano integer A!=z is greater than z, and there is an infinite number of such Peano integers.
-d) Although the two conditions together imply that A=B, a correct Prolog solver must check the cases when A>B or A<B and then reject and backtrack from those, since the Prolog solver cannot determine that A=B in each of the infinitely many cases of different A and B values. For example, even though if A=z, we know the only value that satifies the constraints is B=z, the solver does not know that and must check another, larger value of B to rule out all values of B larger than z.
+d) Although the two conditions together imply that A=B, a correct Prolog solver must enumerate and check the cases when A>B or A<B and then reject and backtrack from those, since the Prolog solver cannot determine that A=B in each of the infinitely many cases of different A and B values. In other words, the solver must use generate-and-test to enumerate the solutions as well as the values that don't work.
+   For example, even though if A=z, we know the only value that satifies the constraints is B=z, the solver does not know that and must check another, larger value of B to rule out all values of B larger than z.
 
 
 PROBLEM 3
@@ -33,8 +34,9 @@ PROBLEM 4
 ---------
 a) Please see problem4.ecl.
    The queries swap([a],L) and swap([],L) both return the original list since there are not two elements in the list that can be swapped.
-b) The mystery/2 predicate performs three swaps on a list W and places the result in Z.
-   The query mystery([1,2,3,...,n],L) returns the list [1,2,3,...,n] with three swaps and places the result in L. These lists are not all different because it is possible and does happen that a certain sequence of three swaps yields the same result as a different sequence of swaps.
+b) The mystery/2 predicate performs three swaps on a list W and places the result in Z. The query mystery([1,2,3,...,n],L) returns the list [1,2,3,...,n] with three swaps and places the result in L.
+   Since on each swap, the program can swap either two of n elements, there are about n possible results of the first swap. And because three swaps are made with O(n) possibilities each time, using the counting rule of probability, mystery/2 will yield about n^3 lists for L.
+   These lists are not all different because it is possible and does happen that a certain sequence of three swaps yields the same result as a different sequence of swaps.
 
 
 PROBLEM 5
@@ -43,9 +45,9 @@ a) Please see problem5.ecl.
 b) The program returns s(z).
 c) The program returns no if A, B, and C are not all Peano integers, except for when A takes the form of s(foo), where foo is not a Peano integer.
 d) Internally, the program is recursively multiplying by A for B times, starting at s(z). The program multiplies by recursively adding A to the current amount, so A additions are called. Since each addition takes A steps, the overall runtime for the program is O(B*A*A).
-e) To calculate the root of n, the query pow(X,X,n) can be used, where X is the square root of n. The program hangs after finding the square root since there are an infinite number of other Peano integers to check.
-   To calculate the base b logarithm of n, the query pow(b,X,n) can be used, where X is the logarithm base b of n.
-   Although the program finds the first and only solution, it does not know that and continues looking forever.
+e) To calculate the Bth root of C, the query pow(A-,B+,C+) can be used.
+   To calculate the base A logarithm of C, the query pow(A+,B-,C+) can be used.
+   The program hangs after finding the solution since there are an infinite number of other Peano integers to check. Although the program finds the first and only solution, it does not know that and continues looking forever.
 
 
 PROBLEM 6
@@ -54,24 +56,24 @@ The cut in cutmember is red since it prevents other solutions from being found; 
 
 - The query cutmember(L,[[a,b],[],[c,d]]), member(X,L). outputs L=[a,b], X=a; then L=[a,b], X=b.
 - The query member(L,[[a,b],[],[c,d]]), cutmember(X,L). outputs L=[a,b], X=a; then L=[c,d], X=c.
-- The query member(L,[[],[a,b],[c,d]]), cutmember(X,L) outputs L=[a,b], X=a.
+- The query member(L,[[],[a,b],[c,d]]), cutmember(X,L). outputs L=[a,b], X=a; then L=[c,d], X=c.
 
-The first and third queries do the same thing, but the second one does not.
+The first query does the same thing, but the second and third ones do not.
 - The query member(L,[[a,b],[],[c,d]]), !, member(X,L). outputs L=[a,b], X=a; then L=[a,b], X=b.
 - The query member(L, [[a,b],[],[c,d]]), member(X,L), !. outputs L=[a,b], X=a.
 - The query member(L,[[],[a,b],[c,d]]), member(X,L), !. outputs L=[a,b], X=a.
-In the second query of the first set, the cut operator inside of cutmember forced X to remain what had been assigned to it. However, the solver was free to go back and change the assignment made by the member predicate, so L=[a,b] became L=[c,d]. Consequently, cutmember was called again, which set X=c. In the second query of the second set, however, the solver is prevented from reaching both calls to the member predicate, so the solver could not change any of the assignments and terminated with one solution.
+In the second query of the first set, the cut operator inside of cutmember forced X to remain what had been assigned to it. However, the solver was free to go back and change the assignment made by the member predicate, so L=[a,b] became L=[c,d]. Consequently, cutmember was called again, which set X=c. In the second query of the second set, however, the solver is prevented from reaching both calls to the member predicate, so the solver could not change any of the assignments and terminated with one solution. Something similar occurs for the third query.
 A cut operator within a subroutine only prevents the solver from backtracking into the subroutine and changing any assignments the subroutine makes. When the cut operator is placed outside the subroutine, however, it prevents the solver from reaching any of the assignments made by constraints before the cut.
 
 
 PROBLEM 7
 ---------
-a) The above program also returns lists L where only some or none of the repeated elements have been removed. For example, if the list [a,a,b,b,c] were given as the first argument, some of the lists returned would have two a's or b's, or both.
+a) The above program also returns, due to backtracking, lists L where only some or none of the repeated elements have been removed. For example, if the list [a,a,b,b,c] were given as the first argument, some of the lists returned would have two a's or b's, or both.
 b) We would like Prolog to return some number that does not equal 3, which would make all of the elements in the list unique. However, Prolog returns X=X. Prolog cannot return what we would like it to.
 c) Insert a cut after the second line. Please see problem7.ecl for the location.
 d) On the query uniq([3,X],L), the modified program returns X=3, L=[3].
-   On the query uniq([3,X],[3,X]), the modifies program still returns X=X. This 
-e) 
+   On the query uniq([3,X],[3,X]), the modifies program still returns X=X. This is because X has not been initialized, so the program finds 3 to be unique in the list and recurses with [X]. Since the program cannot remember from previous recursions that 3 had been taken off the list as unique, the program returns that X can be anything since it is the only element in the list passed on the second recursion of uniq.
+e) The cut operator prevents the solver from backtracking through the clauses to ones placed before the cut. Therefore, ordering of the clauses matter because the cut will stop the solver from backtracking through different clauses, depending on which clauses are placed before the cut.
 
 
 PROBLEM 8
