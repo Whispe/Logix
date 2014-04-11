@@ -50,7 +50,7 @@ e) To calculate the root of n, the query pow(X,X,n) can be used, where X is the 
 
 PROBLEM 6
 ---------
-The cut in cutmember is green since it finds a solution but makes the program more efficient by not looking for alternative solutions. Since the purpose of cutmember is to determine if there is some X which is a member of the given list, its job is done when it finds a single X. If we want to check if a ground integer appears in a long list, cutmember would stop at the first occurrence, thus saving time by not going through the entire list, especially if the ground integer was near the beginning.
+The cut in cutmember is red since it prevents other solutions from being found; once one instance of X is found in the list, the program stops and does not attempt to find other solutions. If we want to check if a ground integer appears in a long list, cutmember would stop at the first occurrence, thus saving time by not going through the entire list, especially if the ground integer was near the beginning.
 
 - The query cutmember(L,[[a,b],[],[c,d]]), member(X,L). outputs L=[a,b], X=a; then L=[a,b], X=b.
 - The query member(L,[[a,b],[],[c,d]]), cutmember(X,L). outputs L=[a,b], X=a; then L=[c,d], X=c.
